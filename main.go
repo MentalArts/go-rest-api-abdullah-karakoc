@@ -13,11 +13,12 @@ import (
 func main() {
 	// Connect to the database
 	config.ConnectDatabase()
+	config.MigrateDB()
 
-	// Initialize repositories
-	bookRepo := repository.BookRepository{}
-	authorRepo := repository.AuthorRepository{}
-	reviewRepo := repository.ReviewRepository{}
+	// Initialize repositories using the factory functions
+	bookRepo := repository.NewBookRepository()
+	authorRepo := repository.NewAuthorRepository()
+	reviewRepo := repository.NewReviewRepository()
 
 	// Initialize services with the corresponding repositories
 	bookService := services.NewBookService(bookRepo)
@@ -36,5 +37,5 @@ func main() {
 	routes.SetupRoutes(r, bookHandler, authorHandler, reviewHandler)
 
 	// Start the server on port 8080
-	r.Run(":8080")
+	r.Run(":8000")
 }

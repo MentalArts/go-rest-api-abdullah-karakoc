@@ -5,22 +5,37 @@ import (
 	"mentalartsapi/internal/repository"
 )
 
-func GetBooks() ([]models.Book, error) {
-	return repository.GetAllBooks()
+// BookService manages book operations
+type BookService struct {
+	Repo repository.BookRepository
 }
 
-func GetBook(id uint) (models.Book, error) {
-	return repository.GetBookByID(id)
+// NewBookService creates a new BookService
+func NewBookService(repo repository.BookRepository) BookService {
+	return BookService{Repo: repo}
 }
 
-func CreateBook(book *models.Book) error {
-	return repository.CreateBook(book)
+// GetBooks retrieves all books
+func (s *BookService) GetBooks() ([]models.Book, error) {
+	return s.Repo.GetAllBooks()
 }
 
-func UpdateBook(book *models.Book) error {
-	return repository.UpdateBook(book)
+// GetBook retrieves a specific book
+func (s *BookService) GetBook(id uint) (models.Book, error) {
+	return s.Repo.GetBookByID(id)
 }
 
-func DeleteBook(id uint) error {
-	return repository.DeleteBook(id)
+// CreateBook creates a new book
+func (s *BookService) CreateBook(book *models.Book) error {
+	return s.Repo.CreateBook(book)
+}
+
+// UpdateBook updates an existing book
+func (s *BookService) UpdateBook(book *models.Book) error {
+	return s.Repo.UpdateBook(book)
+}
+
+// DeleteBook deletes a book by ID
+func (s *BookService) DeleteBook(id uint) error {
+	return s.Repo.DeleteBook(id)
 }
