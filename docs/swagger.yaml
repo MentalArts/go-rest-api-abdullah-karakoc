@@ -1,0 +1,58 @@
+definitions:
+  dto.CreateReviewRequestDTO:
+    properties:
+      comment:
+        type: string
+      date_posted:
+        type: string
+      rating:
+        type: integer
+    required:
+    - rating
+    type: object
+  dto.ReviewResponseDTO:
+    properties:
+      book_id:
+        type: integer
+      book_title:
+        type: string
+      comment:
+        type: string
+      date_posted:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /reviews:
+    post:
+      consumes:
+      - application/json
+      description: Create a new review for a book
+      parameters:
+      - description: Create Review
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateReviewRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ReviewResponseDTO'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new review
+      tags:
+      - Reviews
+swagger: "2.0"

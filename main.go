@@ -8,6 +8,8 @@ import (
 	"mentalartsapi/routes"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -32,6 +34,8 @@ func main() {
 
 	// Create a new Gin router
 	r := gin.Default()
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Setup API routes with the initialized handlers
 	routes.SetupRoutes(r, bookHandler, authorHandler, reviewHandler)

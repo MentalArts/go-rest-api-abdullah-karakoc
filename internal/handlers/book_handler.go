@@ -29,7 +29,15 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 	c.JSON(http.StatusOK, books)
 }
 
-// GetBook, ID'ye göre bir kitabı getirir
+// Book godoc
+// @Summary Get a book by ID
+// @Description Get details of a book
+// @Tags books
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Book ID"
+// @Success 200 {object} models.Book
+// @Router /books/{id} [get]
 func (h *BookHandler) GetBook(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
