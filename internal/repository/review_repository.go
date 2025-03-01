@@ -21,17 +21,22 @@ func NewReviewRepository() ReviewRepository {
 	return &reviewRepo{}
 }
 
-// GetReviewsForBook retrieves all reviews for a given book
+// GetReviewsForBook retrieves all reviews for a given book and preloads the Book data
 func (r *reviewRepo) GetReviewsForBook(bookID uint) ([]models.Review, error) {
 	var reviews []models.Review
-	err := config.DB.Where("book_id = ?", bookID).Find(&reviews).Error
-	return reviews, err
+	// Preload ile ilişkili Book verisini de getiriyoruz
+	err := config.DB.Preload("Book").Where("book_id = ?", bookID).Find(&reviews).Error
+	if err != nil {
+		return nil, err
+	}
+	return reviews, nil
 }
 
 // GetReviewByID retrieves a review by its ID, including the associated Book
 func (r *reviewRepo) GetReviewByID(id uint) (models.Review, error) {
 	var review models.Review
-	err := config.DB.Preload("Book").First(&review, id).Error // 📌 Preload "Book" ile ilişkili veriyi de alıyoruz
+	// Preload "Book" ile ilişkili veriyi de alıyoruz
+	err := config.DB.Preload("Book").First(&review, id).Error
 	if err != nil {
 		return models.Review{}, err
 	}

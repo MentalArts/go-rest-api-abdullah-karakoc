@@ -4,7 +4,6 @@ type CreateReviewRequestDTO struct {
 	Rating     int    `json:"rating" binding:"required"`
 	Comment    string `json:"comment"`
 	DatePosted string `json:"date_posted"`
-	BookID     uint   `json:"book_id" binding:"required"`
 }
 
 type ReviewResponseDTO struct {

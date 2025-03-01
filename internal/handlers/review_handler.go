@@ -22,28 +22,40 @@ func NewReviewHandler(service *services.ReviewService) *ReviewHandler {
 // GetReviewsForBook, belirli bir kitabın tüm yorumlarını getirir
 func (h *ReviewHandler) GetReviewsForBook(c *gin.Context) {
 	bookID, _ := strconv.Atoi(c.Param("id"))
+
+	// Yorumları ve ilişkili Book'u Preload ile getiriyoruz
 	reviews, err := h.Service.GetReviews(uint(bookID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()}) // Error() metodunu kullanıyoruz
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, reviews)
 }
 
-// CreateReview, belirli bir kitaba yeni yorum ekler
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
-	bookID, _ := strconv.Atoi(c.Param("id"))
+	// URL'den gelen kitap ID'sini al
+	bookID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
+	// JSON verisini DTO'ya aktar
 	var reviewDTO dto.CreateReviewRequestDTO
 	if err := c.ShouldBindJSON(&reviewDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	reviewDTO.BookID = uint(bookID) // Kitap ID'sini atama
-	createdReview, err := h.Service.CreateReview(reviewDTO)
+
+	// Servise `bookID` ve DTO'yu gönder
+	createdReview, err := h.Service.CreateReview(uint(bookID), reviewDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Başarıyla oluşturulan veriyi JSON olarak dön
 	c.JSON(http.StatusCreated, createdReview)
 }
 

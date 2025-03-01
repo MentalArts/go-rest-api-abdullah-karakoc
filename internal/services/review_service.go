@@ -11,13 +11,13 @@ type ReviewService struct {
 	Repo repository.ReviewRepository
 }
 
-// NewReviewService, yeni bir ReviewService oluşturur
 func NewReviewService(repo repository.ReviewRepository) *ReviewService {
 	return &ReviewService{Repo: repo}
 }
 
 // GetReviews, belirli bir kitabın yorumlarını DTO formatında döndürür
 func (s *ReviewService) GetReviews(bookID uint) ([]dto.ReviewResponseDTO, error) {
+	// GetReviewsForBook fonksiyonunda Preload kullanılarak Book ilişkisini de yükle
 	reviews, err := s.Repo.GetReviewsForBook(bookID)
 	if err != nil {
 		return nil, err
@@ -25,26 +25,26 @@ func (s *ReviewService) GetReviews(bookID uint) ([]dto.ReviewResponseDTO, error)
 
 	var reviewDTOs []dto.ReviewResponseDTO
 	for _, review := range reviews {
+		// review.Book.Title'ı alabilmek için Book ilişkisini önceden yüklemelisiniz
 		reviewDTOs = append(reviewDTOs, dto.ReviewResponseDTO{
 			ID:         review.ID,
 			Rating:     review.Rating,
 			Comment:    review.Comment,
 			DatePosted: review.DatePosted,
 			BookID:     review.BookID,
-			BookTitle:  review.Book.Title, // Artık `review.Book` erişilebilir!
+			BookTitle:  review.Book.Title, // Artık Book ilişkisi yüklendiği için başlık alınabiliyor
 		})
 	}
 
 	return reviewDTOs, nil
 }
 
-// CreateReview, yeni bir yorum ekler ve DTO formatında döndürür
-func (s *ReviewService) CreateReview(req dto.CreateReviewRequestDTO) (dto.ReviewResponseDTO, error) {
+func (s *ReviewService) CreateReview(bookID uint, req dto.CreateReviewRequestDTO) (dto.ReviewResponseDTO, error) {
 	review := models.Review{
 		Rating:     req.Rating,
 		Comment:    req.Comment,
 		DatePosted: req.DatePosted,
-		BookID:     req.BookID,
+		BookID:     bookID, // 📌 URL'den gelen `bookID` burada kullanılıyor!
 	}
 
 	err := s.Repo.CreateReview(&review)
@@ -52,7 +52,7 @@ func (s *ReviewService) CreateReview(req dto.CreateReviewRequestDTO) (dto.Review
 		return dto.ReviewResponseDTO{}, err
 	}
 
-	// Yeni eklenen yorumu tekrar `GetReviewByID` ile çekerek `Book.Title` bilgisine erişiyoruz
+	// Yeni eklenen yorumu tekrar çekiyoruz
 	review, err = s.Repo.GetReviewByID(review.ID)
 	if err != nil {
 		return dto.ReviewResponseDTO{}, err
@@ -64,7 +64,7 @@ func (s *ReviewService) CreateReview(req dto.CreateReviewRequestDTO) (dto.Review
 		Comment:    review.Comment,
 		DatePosted: review.DatePosted,
 		BookID:     review.BookID,
-		BookTitle:  review.Book.Title, // Artık hata vermeyecek
+		BookTitle:  review.Book.Title,
 	}, nil
 }
 
@@ -78,6 +78,7 @@ func (s *ReviewService) UpdateReview(id uint, req dto.CreateReviewRequestDTO) (d
 	// Güncellenen alanları atama
 	review.Rating = req.Rating
 	review.Comment = req.Comment
+
 	review.DatePosted = req.DatePosted
 
 	err = s.Repo.UpdateReview(&review)
