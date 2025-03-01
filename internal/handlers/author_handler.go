@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"mentalartsapi/internal/models"
+	"mentalartsapi/internal/dto"
 	"mentalartsapi/internal/services"
 	"net/http"
 	"strconv"
@@ -11,11 +11,11 @@ import (
 
 // AuthorHandler, yazar işlemlerini yöneten handler yapısı
 type AuthorHandler struct {
-	Service services.AuthorService
+	Service *services.AuthorService
 }
 
 // NewAuthorHandler, yeni bir AuthorHandler oluşturur
-func NewAuthorHandler(service services.AuthorService) *AuthorHandler {
+func NewAuthorHandler(service *services.AuthorService) *AuthorHandler {
 	return &AuthorHandler{Service: service}
 }
 
@@ -31,7 +31,12 @@ func (h *AuthorHandler) GetAuthors(c *gin.Context) {
 
 // GetAuthor, ID'ye göre bir yazarı getirir
 func (h *AuthorHandler) GetAuthor(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
 	author, err := h.Service.GetAuthor(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Author not found"})
@@ -40,42 +45,58 @@ func (h *AuthorHandler) GetAuthor(c *gin.Context) {
 	c.JSON(http.StatusOK, author)
 }
 
-// CreateAuthor, yeni bir yazar oluşturur
+// CreateAuthor, yeni bir yazar oluşturur (DTO kullanılarak)
 func (h *AuthorHandler) CreateAuthor(c *gin.Context) {
-	var author models.Author
-	if err := c.ShouldBindJSON(&author); err != nil {
+	var req dto.CreateAuthorRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.Service.CreateAuthor(&author); err != nil {
+
+	author, err := h.Service.CreateAuthor(req)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusCreated, author)
 }
 
-// UpdateAuthor, var olan bir yazarı günceller
+// UpdateAuthor, var olan bir yazarı günceller (DTO kullanılarak)
 func (h *AuthorHandler) UpdateAuthor(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	var author models.Author
-	if err := c.ShouldBindJSON(&author); err != nil {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var req dto.CreateAuthorRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	author.ID = uint(id)
-	if err := h.Service.UpdateAuthor(&author); err != nil {
+
+	updatedAuthor, err := h.Service.UpdateAuthor(uint(id), req)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, author)
+
+	c.JSON(http.StatusOK, updatedAuthor)
 }
 
 // DeleteAuthor, ID'ye göre yazarı siler
 func (h *AuthorHandler) DeleteAuthor(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
 	if err := h.Service.DeleteAuthor(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusNoContent, nil)
 }

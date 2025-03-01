@@ -8,4 +8,5 @@ type Review struct {
 	Comment    string `json:"comment"`
 	DatePosted string `json:"date_posted"`
 	BookID     uint   `json:"book_id"`
+	Book       Book   `gorm:"foreignKey:BookID"`
 }

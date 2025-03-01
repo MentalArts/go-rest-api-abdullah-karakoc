@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"mentalartsapi/internal/models"
+	"mentalartsapi/internal/dto"
 	"mentalartsapi/internal/services"
 	"net/http"
 	"strconv"
@@ -11,11 +11,11 @@ import (
 
 // ReviewHandler, yorum işlemlerini yöneten handler yapısı
 type ReviewHandler struct {
-	Service services.ReviewService
+	Service *services.ReviewService
 }
 
 // NewReviewHandler, yeni bir ReviewHandler oluşturur
-func NewReviewHandler(service services.ReviewService) *ReviewHandler {
+func NewReviewHandler(service *services.ReviewService) *ReviewHandler {
 	return &ReviewHandler{Service: service}
 }
 
@@ -24,7 +24,7 @@ func (h *ReviewHandler) GetReviewsForBook(c *gin.Context) {
 	bookID, _ := strconv.Atoi(c.Param("id"))
 	reviews, err := h.Service.GetReviews(uint(bookID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()}) // Error() metodunu kullanıyoruz
 		return
 	}
 	c.JSON(http.StatusOK, reviews)
@@ -33,39 +33,41 @@ func (h *ReviewHandler) GetReviewsForBook(c *gin.Context) {
 // CreateReview, belirli bir kitaba yeni yorum ekler
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	bookID, _ := strconv.Atoi(c.Param("id"))
-	var review models.Review
-	if err := c.ShouldBindJSON(&review); err != nil {
+	var reviewDTO dto.CreateReviewRequestDTO
+	if err := c.ShouldBindJSON(&reviewDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	review.BookID = uint(bookID) // Kitap ID'sini atama
-	if err := h.Service.CreateReview(&review); err != nil {
+	reviewDTO.BookID = uint(bookID) // Kitap ID'sini atama
+	createdReview, err := h.Service.CreateReview(reviewDTO)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, review)
+	c.JSON(http.StatusCreated, createdReview)
 }
 
 // UpdateReview, belirli bir yorumu günceller
 func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	reviewID, _ := strconv.Atoi(c.Param("id"))
-	var review models.Review
-	if err := c.ShouldBindJSON(&review); err != nil {
+	var reviewDTO dto.CreateReviewRequestDTO
+	if err := c.ShouldBindJSON(&reviewDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	review.ID = uint(reviewID) // Yorum ID'sini atama
-	if err := h.Service.UpdateReview(&review); err != nil {
+	updatedReview, err := h.Service.UpdateReview(uint(reviewID), reviewDTO)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, review)
+	c.JSON(http.StatusOK, updatedReview)
 }
 
 // DeleteReview, belirli bir yorumu siler
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	reviewID, _ := strconv.Atoi(c.Param("id"))
-	if err := h.Service.DeleteReview(uint(reviewID)); err != nil {
+	err := h.Service.DeleteReview(uint(reviewID)) // Hata tipi `error` olarak döndürülecek
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

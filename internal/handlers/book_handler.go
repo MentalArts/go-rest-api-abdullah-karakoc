@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"mentalartsapi/internal/models"
+	"mentalartsapi/internal/dto"
 	"mentalartsapi/internal/services"
 	"net/http"
 	"strconv"
@@ -11,11 +11,11 @@ import (
 
 // BookHandler, kitap işlemlerini yöneten handler yapısı
 type BookHandler struct {
-	Service services.BookService
+	Service *services.BookService
 }
 
 // NewBookHandler, yeni bir BookHandler oluşturur
-func NewBookHandler(service services.BookService) *BookHandler {
+func NewBookHandler(service *services.BookService) *BookHandler {
 	return &BookHandler{Service: service}
 }
 
@@ -31,7 +31,12 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 
 // GetBook, ID'ye göre bir kitabı getirir
 func (h *BookHandler) GetBook(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
 	book, err := h.Service.GetBook(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
@@ -42,12 +47,14 @@ func (h *BookHandler) GetBook(c *gin.Context) {
 
 // CreateBook, yeni bir kitap oluşturur
 func (h *BookHandler) CreateBook(c *gin.Context) {
-	var book models.Book
-	if err := c.ShouldBindJSON(&book); err != nil {
+	var req dto.CreateBookRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.Service.CreateBook(&book); err != nil {
+
+	book, err := h.Service.CreateBook(req)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -56,14 +63,20 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 
 // UpdateBook, var olan bir kitabı günceller
 func (h *BookHandler) UpdateBook(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	var book models.Book
-	if err := c.ShouldBindJSON(&book); err != nil {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
+	var req dto.CreateBookRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	book.ID = uint(id)
-	if err := h.Service.UpdateBook(&book); err != nil {
+
+	book, err := h.Service.UpdateBook(uint(id), req)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -72,7 +85,12 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 
 // DeleteBook, ID'ye göre kitabı siler
 func (h *BookHandler) DeleteBook(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
 	if err := h.Service.DeleteBook(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
