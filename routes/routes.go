@@ -16,6 +16,8 @@ func SetupRoutes(router *gin.Engine, bookHandler *handlers.BookHandler, authorHa
 			books.POST("/", bookHandler.CreateBook)
 			books.PUT("/:id", bookHandler.UpdateBook)
 			books.DELETE("/:id", bookHandler.DeleteBook)
+			books.GET("/:id/reviews", reviewHandler.GetReviewsForBook)
+			books.POST("/:id/reviews", reviewHandler.CreateReview)
 		}
 
 		authors := v1.Group("/authors")
@@ -29,8 +31,6 @@ func SetupRoutes(router *gin.Engine, bookHandler *handlers.BookHandler, authorHa
 
 		reviews := v1.Group("/reviews")
 		{
-			reviews.GET("/books/:id/reviews", reviewHandler.GetReviewsForBook)
-			reviews.POST("/books/:id/reviews", reviewHandler.CreateReview)
 			reviews.PUT("/:id", reviewHandler.UpdateReview)
 			reviews.DELETE("/:id", reviewHandler.DeleteReview)
 		}

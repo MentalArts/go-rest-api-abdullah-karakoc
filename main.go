@@ -7,11 +7,28 @@ import (
 	"mentalartsapi/internal/services"
 	"mentalartsapi/routes"
 
+	_ "mentalartsapi/docs"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+//	@title			Book Library Management API
+//	@version		1.0
+//	@description	This is a REST API for managing books, authors, and reviews.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	MIT
+//	@license.url	https://opensource.org/licenses/MIT
+
+// @host		localhost:8000
+// @BasePath	/api/v1
+// @schemes	http
 func main() {
 	// Connect to the database
 	config.ConnectDatabase()
@@ -32,14 +49,11 @@ func main() {
 	authorHandler := handlers.NewAuthorHandler(authorService)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 
-	// Create a new Gin router
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Setup API routes with the initialized handlers
 	routes.SetupRoutes(r, bookHandler, authorHandler, reviewHandler)
 
-	// Start the server on port 8080
 	r.Run(":8000")
 }

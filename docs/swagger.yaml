@@ -1,4 +1,60 @@
+basePath: /api/v1
 definitions:
+  dto.AuthorResponseDTO:
+    properties:
+      biography:
+        type: string
+      birth_date:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.BookResponseDTO:
+    properties:
+      author_id:
+        type: integer
+      author_name:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      isbn:
+        type: string
+      publication_year:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.CreateAuthorRequestDTO:
+    properties:
+      biography:
+        type: string
+      birth_date:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreateBookRequestDTO:
+    properties:
+      author_id:
+        type: integer
+      description:
+        type: string
+      isbn:
+        type: string
+      publication_year:
+        type: integer
+      title:
+        type: string
+    required:
+    - author_id
+    - title
+    type: object
   dto.CreateReviewRequestDTO:
     properties:
       comment:
@@ -25,16 +81,325 @@ definitions:
       rating:
         type: integer
     type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+host: localhost:8000
 info:
-  contact: {}
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a REST API for managing books, authors, and reviews.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Book Library Management API
+  version: "1.0"
 paths:
-  /reviews:
+  /authors:
+    get:
+      description: Retrieves a list of all authors
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AuthorResponseDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get all authors
+      tags:
+      - authors
     post:
       consumes:
       - application/json
-      description: Create a new review for a book
+      description: Creates a new author using the provided details
       parameters:
-      - description: Create Review
+      - description: Author Data
+        in: body
+        name: author
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAuthorRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.AuthorResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Create a new author
+      tags:
+      - authors
+  /authors/{id}:
+    delete:
+      description: Deletes an author by ID
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete an author
+      tags:
+      - authors
+    get:
+      description: Retrieves an author by their unique ID
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthorResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get an author by ID
+      tags:
+      - authors
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing author by ID
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Author Data
+        in: body
+        name: author
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAuthorRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthorResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update an author
+      tags:
+      - authors
+  /books:
+    get:
+      description: Retrieves a list of all books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.BookResponseDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get all books
+      tags:
+      - books
+    post:
+      consumes:
+      - application/json
+      description: Creates a new book using the provided details
+      parameters:
+      - description: Book Data
+        in: body
+        name: book
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBookRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.BookResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Create a new book
+      tags:
+      - books
+  /books/{id}:
+    delete:
+      description: Deletes a book by ID
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete a book
+      tags:
+      - books
+    get:
+      description: Retrieves a book by its unique ID
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get a book by ID
+      tags:
+      - books
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing book by ID
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Book Data
+        in: body
+        name: book
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBookRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BookResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update a book
+      tags:
+      - books
+  /books/{id}/reviews:
+    get:
+      description: Retrieves a list of reviews for a specific book by its ID
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ReviewResponseDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get reviews for a book
+      tags:
+      - reviews
+    post:
+      consumes:
+      - application/json
+      description: Creates a new review for a specific book
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Review Data
         in: body
         name: review
         required: true
@@ -48,11 +413,81 @@ paths:
           schema:
             $ref: '#/definitions/dto.ReviewResponseDTO'
         "400":
-          description: Invalid request
+          description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
       summary: Create a new review
       tags:
-      - Reviews
+      - reviews
+  /reviews/{id}:
+    delete:
+      description: Deletes a review by its ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete a review
+      tags:
+      - reviews
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing review by its ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Review Data
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateReviewRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReviewResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update a review
+      tags:
+      - reviews
+schemes:
+- http
 swagger: "2.0"
