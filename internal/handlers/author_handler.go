@@ -20,6 +20,7 @@ func NewAuthorHandler(service *services.AuthorService) *AuthorHandler {
 }
 
 // GetAuthors retrieves all authors
+//
 //	@Summary		Get all authors
 //	@Description	Retrieves a list of all authors
 //	@Tags			authors
@@ -37,6 +38,7 @@ func (h *AuthorHandler) GetAuthors(c *gin.Context) {
 }
 
 // GetAuthor retrieves an author by ID
+//
 //	@Summary		Get an author by ID
 //	@Description	Retrieves an author by their unique ID
 //	@Tags			authors
@@ -62,6 +64,7 @@ func (h *AuthorHandler) GetAuthor(c *gin.Context) {
 }
 
 // CreateAuthor creates a new author
+//
 //	@Summary		Create a new author
 //	@Description	Creates a new author using the provided details
 //	@Tags			authors
@@ -89,6 +92,7 @@ func (h *AuthorHandler) CreateAuthor(c *gin.Context) {
 }
 
 // UpdateAuthor updates an existing author
+//
 //	@Summary		Update an author
 //	@Description	Updates an existing author by ID
 //	@Tags			authors
@@ -123,6 +127,7 @@ func (h *AuthorHandler) UpdateAuthor(c *gin.Context) {
 }
 
 // DeleteAuthor deletes an author
+//
 //	@Summary		Delete an author
 //	@Description	Deletes an author by ID
 //	@Tags			authors

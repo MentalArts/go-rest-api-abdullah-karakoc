@@ -20,6 +20,7 @@ func NewBookHandler(service *services.BookService) *BookHandler {
 }
 
 // GetBooks retrieves all books
+//
 //	@Summary		Get all books
 //	@Description	Retrieves a list of all books
 //	@Tags			books
@@ -37,6 +38,7 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 }
 
 // GetBook retrieves a book by ID
+//
 //	@Summary		Get a book by ID
 //	@Description	Retrieves a book by its unique ID
 //	@Tags			books
@@ -62,6 +64,7 @@ func (h *BookHandler) GetBook(c *gin.Context) {
 }
 
 // CreateBook creates a new book
+//
 //	@Summary		Create a new book
 //	@Description	Creates a new book using the provided details
 //	@Tags			books
@@ -88,6 +91,7 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 }
 
 // UpdateBook updates an existing book
+//
 //	@Summary		Update a book
 //	@Description	Updates an existing book by ID
 //	@Tags			books
@@ -121,6 +125,7 @@ func (h *BookHandler) UpdateBook(c *gin.Context) {
 }
 
 // DeleteBook deletes a book
+//
 //	@Summary		Delete a book
 //	@Description	Deletes a book by ID
 //	@Tags			books
