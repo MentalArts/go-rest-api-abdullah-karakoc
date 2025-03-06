@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"mentalartsapi/config"
 	"mentalartsapi/internal/handlers"
 	"mentalartsapi/internal/repository"
@@ -35,15 +36,18 @@ func main() {
 	config.ConnectDatabase()
 	config.MigrateDB()
 
+	// Create a context for Redis operations (already handled in config.ConnectDatabase)
+	ctx := context.Background()
+
 	// Initialize repositories using the factory functions
 	bookRepo := repository.NewBookRepository()
 	authorRepo := repository.NewAuthorRepository()
 	reviewRepo := repository.NewReviewRepository()
 
-	// Initialize services with the corresponding repositories
-	bookService := services.NewBookService(bookRepo)
-	authorService := services.NewAuthorService(authorRepo)
-	reviewService := services.NewReviewService(reviewRepo)
+	// Initialize services with the corresponding repositories and Redis client
+	bookService := services.NewBookService(bookRepo, config.Redis, ctx)
+	authorService := services.NewAuthorService(authorRepo, config.Redis, ctx)
+	reviewService := services.NewReviewService(reviewRepo, config.Redis, ctx)
 
 	// Initialize handlers with the corresponding services
 	bookHandler := handlers.NewBookHandler(bookService)
