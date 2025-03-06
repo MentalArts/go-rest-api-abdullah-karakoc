@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"mentalartsapi/internal/models" // models paketini doğru bir şekilde import edin
+	"mentalartsapi/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,7 +14,6 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	// Ortam değişkenlerini doğrudan al
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
@@ -31,12 +30,10 @@ func ConnectDatabase() {
 	}
 	fmt.Println("Database connected successfully!")
 
-	// Migration işlemini gerçekleştir
 	MigrateDB()
 }
 
 func MigrateDB() {
-	// Model yapılarınızı buraya ekleyin
 	err := DB.AutoMigrate(&models.Author{}, &models.Book{}, &models.Review{})
 	if err != nil {
 		log.Fatal("Error migrating database:", err)

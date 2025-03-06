@@ -6,18 +6,17 @@ import (
 	"mentalartsapi/internal/repository"
 )
 
-// ReviewService, yorum işlemlerini yöneten servis yapısı
+// ReviewService manages book operations
 type ReviewService struct {
 	Repo repository.ReviewRepository
 }
 
+// NewReviewService creates a new BookService
 func NewReviewService(repo repository.ReviewRepository) *ReviewService {
 	return &ReviewService{Repo: repo}
 }
 
-// GetReviews, belirli bir kitabın yorumlarını DTO formatında döndürür
 func (s *ReviewService) GetReviews(bookID uint) ([]dto.ReviewResponseDTO, error) {
-	// GetReviewsForBook fonksiyonunda Preload kullanılarak Book ilişkisini de yükle
 	reviews, err := s.Repo.GetReviewsForBook(bookID)
 	if err != nil {
 		return nil, err
@@ -25,14 +24,13 @@ func (s *ReviewService) GetReviews(bookID uint) ([]dto.ReviewResponseDTO, error)
 
 	var reviewDTOs []dto.ReviewResponseDTO
 	for _, review := range reviews {
-		// review.Book.Title'ı alabilmek için Book ilişkisini önceden yüklemelisiniz
 		reviewDTOs = append(reviewDTOs, dto.ReviewResponseDTO{
 			ID:         review.ID,
 			Rating:     review.Rating,
 			Comment:    review.Comment,
 			DatePosted: review.DatePosted,
 			BookID:     review.BookID,
-			BookTitle:  review.Book.Title, // Artık Book ilişkisi yüklendiği için başlık alınabiliyor
+			BookTitle:  review.Book.Title,
 		})
 	}
 
@@ -44,7 +42,7 @@ func (s *ReviewService) CreateReview(bookID uint, req dto.CreateReviewRequestDTO
 		Rating:     req.Rating,
 		Comment:    req.Comment,
 		DatePosted: req.DatePosted,
-		BookID:     bookID, // 📌 URL'den gelen `bookID` burada kullanılıyor!
+		BookID:     bookID,
 	}
 
 	err := s.Repo.CreateReview(&review)
@@ -52,7 +50,6 @@ func (s *ReviewService) CreateReview(bookID uint, req dto.CreateReviewRequestDTO
 		return dto.ReviewResponseDTO{}, err
 	}
 
-	// Yeni eklenen yorumu tekrar çekiyoruz
 	review, err = s.Repo.GetReviewByID(review.ID)
 	if err != nil {
 		return dto.ReviewResponseDTO{}, err
@@ -68,14 +65,12 @@ func (s *ReviewService) CreateReview(bookID uint, req dto.CreateReviewRequestDTO
 	}, nil
 }
 
-// UpdateReview, var olan bir yorumu günceller ve DTO formatında döndürür
 func (s *ReviewService) UpdateReview(id uint, req dto.CreateReviewRequestDTO) (dto.ReviewResponseDTO, error) {
 	review, err := s.Repo.GetReviewByID(id)
 	if err != nil {
 		return dto.ReviewResponseDTO{}, err
 	}
 
-	// Güncellenen alanları atama
 	review.Rating = req.Rating
 	review.Comment = req.Comment
 
@@ -92,11 +87,10 @@ func (s *ReviewService) UpdateReview(id uint, req dto.CreateReviewRequestDTO) (d
 		Comment:    review.Comment,
 		DatePosted: review.DatePosted,
 		BookID:     review.BookID,
-		BookTitle:  review.Book.Title, // Artık `review.Book` ilişkilendirildi
+		BookTitle:  review.Book.Title,
 	}, nil
 }
 
-// DeleteReview, belirli bir yorumu siler
 func (s *ReviewService) DeleteReview(id uint) error {
 	err := s.Repo.DeleteReview(id)
 	if err != nil {
