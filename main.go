@@ -5,6 +5,7 @@ import (
 	"mentalartsapi/internal/handlers"
 	"mentalartsapi/internal/repository"
 	"mentalartsapi/internal/services"
+	"mentalartsapi/middlewares"
 	"mentalartsapi/routes"
 
 	_ "mentalartsapi/docs"
@@ -50,6 +51,10 @@ func main() {
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 
 	r := gin.Default()
+
+	// Rate Limiting Middleware (1 second at most 100 request, burst = 150)
+	rateLimiter := middlewares.NewRateLimiter(100, 150)
+	r.Use(rateLimiter.Limit())
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
