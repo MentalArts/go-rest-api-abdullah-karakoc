@@ -32,38 +32,44 @@ import (
 // @BasePath	/api/v1
 // @schemes	http
 func main() {
-	// Connect to the database
+	// Connect to the database and migrate models
 	config.ConnectDatabase()
 	config.MigrateDB()
 
-	// Create a context for Redis operations (already handled in config.ConnectDatabase)
+	// Create a context for Redis operations
 	ctx := context.Background()
 
-	// Initialize repositories using the factory functions
+	// Initialize repositories and services
 	bookRepo := repository.NewBookRepository()
 	authorRepo := repository.NewAuthorRepository()
 	reviewRepo := repository.NewReviewRepository()
+	userRepo := repository.NewUserRepository(config.DB)
 
-	// Initialize services with the corresponding repositories and Redis client
 	bookService := services.NewBookService(bookRepo, config.Redis, ctx)
 	authorService := services.NewAuthorService(authorRepo, config.Redis, ctx)
 	reviewService := services.NewReviewService(reviewRepo, config.Redis, ctx)
+	authService := services.NewAuthService(*userRepo)
 
-	// Initialize handlers with the corresponding services
+	// Initialize handlers
 	bookHandler := handlers.NewBookHandler(bookService)
 	authorHandler := handlers.NewAuthorHandler(authorService)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
+	authHandler := handlers.NewAuthHandler(authService)
 
+	// Set up the router
 	r := gin.Default()
 
-	// Rate Limiting Middleware (1 second at most 100 request, burst = 150)
+	// Rate Limiting Middleware
 	rateLimiter := middlewares.NewRateLimiter(100, 150)
 	r.Use(rateLimiter.Limit())
 	r.Use(middlewares.ErrorHandlerMiddleware())
 
+	// Swagger Documentation
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	routes.SetupRoutes(r, bookHandler, authorHandler, reviewHandler)
+	// Set up routes (using a separate routes.go file)
+	routes.SetupRoutes(r, bookHandler, authorHandler, reviewHandler, authHandler)
 
+	// Start the server
 	r.Run(":8000")
 }
