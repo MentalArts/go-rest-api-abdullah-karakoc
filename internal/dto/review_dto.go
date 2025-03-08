@@ -1,9 +1,9 @@
 package dto
 
 type CreateReviewRequestDTO struct {
-	Rating     int    `json:"rating" binding:"required"`
-	Comment    string `json:"comment"`
-	DatePosted string `json:"date_posted"`
+	Rating     int    `json:"rating" binding:"required,gte=1,lte=5"`
+	Comment    string `json:"comment" binding:"max=500"`
+	DatePosted string `json:"date_posted" binding:"required,datetime=2006-01-02"`
 }
 
 type ReviewResponseDTO struct {
