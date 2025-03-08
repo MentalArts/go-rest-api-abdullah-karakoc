@@ -31,12 +31,17 @@ definitions:
   dto.CreateAuthorRequestDTO:
     properties:
       biography:
+        maxLength: 500
         type: string
       birth_date:
+        description: YYYY-MM-DD
         type: string
       name:
+        maxLength: 30
+        minLength: 3
         type: string
     required:
+    - birth_date
     - name
     type: object
   dto.CreateBookRequestDTO:
@@ -44,27 +49,68 @@ definitions:
       author_id:
         type: integer
       description:
+        maxLength: 500
         type: string
       isbn:
         type: string
       publication_year:
+        maximum: 2025
+        minimum: 1450
         type: integer
       title:
+        maxLength: 50
+        minLength: 3
         type: string
     required:
     - author_id
+    - isbn
+    - publication_year
     - title
     type: object
   dto.CreateReviewRequestDTO:
     properties:
       comment:
+        maxLength: 500
         type: string
       date_posted:
         type: string
       rating:
+        maximum: 5
+        minimum: 1
         type: integer
     required:
+    - date_posted
     - rating
+    type: object
+  dto.ErrorResponseDTO:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.LoginRequestDTO:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.RegisterRequestDTO:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
     type: object
   dto.ReviewResponseDTO:
     properties:
@@ -81,8 +127,31 @@ definitions:
       rating:
         type: integer
     type: object
-  gin.H:
-    additionalProperties: {}
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        description: Admin, User
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
     type: object
 host: localhost:8000
 info:
@@ -98,6 +167,124 @@ info:
   title: Book Library Management API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint logs in an existing user and returns a JWT token
+      parameters:
+      - description: User Login Info
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT Token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - Auth
+  /auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint refreshes a JWT token using the current token
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New JWT Token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid token format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid or expired token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh JWT Token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint registers a new user by providing username, email,
+        and password
+      parameters:
+      - description: User Registration Info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
   /authors:
     get:
       description: Retrieves a list of all authors
@@ -113,7 +300,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Get all authors
       tags:
       - authors
@@ -138,11 +325,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Create a new author
       tags:
       - authors
@@ -161,11 +348,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Delete an author
       tags:
       - authors
@@ -187,11 +378,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Get an author by ID
       tags:
       - authors
@@ -221,11 +412,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Update an author
       tags:
       - authors
@@ -244,7 +435,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Get all books
       tags:
       - books
@@ -269,11 +460,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Create a new book
       tags:
       - books
@@ -292,11 +483,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Delete a book
       tags:
       - books
@@ -318,11 +513,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Get a book by ID
       tags:
       - books
@@ -352,11 +547,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Update a book
       tags:
       - books
@@ -381,11 +576,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Get reviews for a book
       tags:
       - reviews
@@ -415,11 +610,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Create a new review
       tags:
       - reviews
@@ -438,15 +633,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Delete a review
       tags:
       - reviews
@@ -476,15 +671,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/dto.ErrorResponseDTO'
       summary: Update a review
       tags:
       - reviews

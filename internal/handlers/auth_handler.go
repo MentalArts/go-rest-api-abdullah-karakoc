@@ -22,6 +22,17 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 }
 
 // RegisterUser registers a new user
+//
+//	@Summary		Register a new user
+//	@Description	This endpoint registers a new user by providing username, email, and password
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		dto.RegisterRequestDTO	true	"User Registration Info"
+//	@Success		201		{object}	models.User	"User Created"
+//	@Failure		400		{object}	map[string]string		"Invalid input"
+//	@Failure		500		{object}	map[string]string		"Internal server error"
+//	@Router			/auth/register [post]
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	var userDTO dto.RegisterRequestDTO
 	if err := c.ShouldBindJSON(&userDTO); err != nil {
@@ -43,6 +54,18 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 }
 
 // LoginUser logs in an existing user and provides a JWT
+//
+//	@Summary		Login a user
+//	@Description	This endpoint logs in an existing user and returns a JWT token
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			login	body		dto.LoginRequestDTO	true	"User Login Info"
+//	@Success		200		{object}	map[string]string		"JWT Token"
+//	@Failure		400		{object}	map[string]string	"Invalid input"
+//	@Failure		401		{object}	map[string]string	"Invalid credentials"
+//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Router			/auth/login [post]
 func (h *AuthHandler) LoginUser(c *gin.Context) {
 	var loginDTO dto.LoginRequestDTO
 	if err := c.ShouldBindJSON(&loginDTO); err != nil {
@@ -72,6 +95,18 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 }
 
 // RefreshToken refreshes a JWT token
+//
+//	@Summary		Refresh JWT Token
+//	@Description	This endpoint refreshes a JWT token using the current token
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			Authorization	header		string	true	"Bearer Token"
+//	@Success		200		{object}	map[string]string	"New JWT Token"
+//	@Failure		400		{object}	map[string]string	"Invalid token format"
+//	@Failure		401		{object}	map[string]string	"Invalid or expired token"
+//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Router			/auth/refresh-token [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {

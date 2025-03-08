@@ -80,13 +80,13 @@ func ConnectRedis() {
 
 // SeedAdminUser adds an admin user to the database if not already present
 func SeedAdminUser() {
-	// Check if the admin already exists
+	// Check if the admin already exists by username or email
 	var admin models.User
-	if err := DB.Where("email = ?", "admin@example.com").First(&admin).Error; err != nil {
+	if err := DB.Where("username = ?", "admin").Or("email = ?", "admin@gmail.com").First(&admin).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// Admin does not exist, create one
 			admin = models.User{
-				Username: "admin",
+				Username: "admin", // Default username for admin
 				Email:    "admin@gmail.com",
 				Password: "adminpassword", // In a real scenario, use a hashed password
 				Role:     "admin",         // Set role as admin
@@ -109,6 +109,17 @@ func SeedAdminUser() {
 			log.Fatal("Error checking for existing admin user:", err)
 		}
 	} else {
-		fmt.Println("Admin user already exists!")
+		// If admin already exists, update the password or other information
+		hashedPassword, err := utils.HashPassword("adminpassword")
+		if err != nil {
+			log.Fatal("Error hashing admin password:", err)
+		}
+		admin.Password = hashedPassword
+
+		// Update the admin user
+		if err := DB.Save(&admin).Error; err != nil {
+			log.Fatal("Error updating admin user:", err)
+		}
+		fmt.Println("Admin user already exists! Password updated.")
 	}
 }
