@@ -7,6 +7,7 @@ import (
 	"mentalartsapi/internal/dto"
 	"mentalartsapi/internal/models"
 	"mentalartsapi/internal/repository"
+	"mentalartsapi/internal/utils"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -130,18 +131,23 @@ func (s *ReviewService) UpdateReview(id uint, req dto.CreateReviewRequestDTO) (d
 
 // DeleteReview deletes a review by ID
 func (s *ReviewService) DeleteReview(id uint) error {
+	// Yorumun var olup olmadığını kontrol et
 	review, err := s.Repo.GetReviewByID(id)
 	if err != nil {
-		return err
+		// Eğer yorum bulunamazsa, NotFound hatası döndürüyoruz
+		return utils.ErrNotFound
 	}
 
+	// Yorum silme işlemi
 	err = s.Repo.DeleteReview(id)
 	if err != nil {
+		// Silme işlemi başarısız olursa, Internal Server Error döndürüyoruz
 		return err
 	}
 
-	// Invalidate cache when deleting a review
+	// Cache geçersiz kılma işlemi
 	s.Cache.Del(s.Ctx, fmt.Sprintf("reviews_book:%d", review.BookID))
+	s.Cache.Del(s.Ctx, fmt.Sprintf("reviews_book:%d", id)) // Yorumun kendi cache'ini de temizle
 
 	return nil
 }
