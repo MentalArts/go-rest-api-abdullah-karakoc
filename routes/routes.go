@@ -21,40 +21,34 @@ func SetupRoutes(router *gin.Engine, bookHandler *handlers.BookHandler, authorHa
 		// Protected routes with JWT authentication
 		v1.Use(middlewares.JWTAuthMiddleware()) // Protect these routes with JWT Auth Middleware
 
-		// Book routes
+		// Book routes (Admin or Author can perform POST, PUT, DELETE)
 		books := v1.Group("/books")
 		{
 			books.GET("/", bookHandler.GetBooks)
 			books.GET("/:id", bookHandler.GetBook)
-			books.POST("/", bookHandler.CreateBook) // Only Admin or Author can post
-			books.PUT("/:id", bookHandler.UpdateBook)
-			books.DELETE("/:id", bookHandler.DeleteBook)
+			books.POST("/", middlewares.AdminOnly(), bookHandler.CreateBook)      // Only Admin can POST
+			books.PUT("/:id", middlewares.AdminOnly(), bookHandler.UpdateBook)    // Only Admin can PUT
+			books.DELETE("/:id", middlewares.AdminOnly(), bookHandler.DeleteBook) // Only Admin can DELETE
 			books.GET("/:id/reviews", reviewHandler.GetReviewsForBook)
 			books.POST("/:id/reviews", reviewHandler.CreateReview)
 		}
 
-		// Author routes
+		// Author routes (Admin or Author can perform POST, PUT, DELETE)
 		authors := v1.Group("/authors")
 		{
 			authors.GET("/", authorHandler.GetAuthors)
 			authors.GET("/:id", authorHandler.GetAuthor)
-			authors.POST("/", authorHandler.CreateAuthor)
-			authors.PUT("/:id", authorHandler.UpdateAuthor)
-			authors.DELETE("/:id", authorHandler.DeleteAuthor)
+			authors.POST("/", middlewares.AdminOnly(), authorHandler.CreateAuthor)      // Only Admin can POST
+			authors.PUT("/:id", middlewares.AdminOnly(), authorHandler.UpdateAuthor)    // Only Admin can PUT
+			authors.DELETE("/:id", middlewares.AdminOnly(), authorHandler.DeleteAuthor) // Only Admin can DELETE
 		}
 
 		// Review routes
 		reviews := v1.Group("/reviews")
 		{
-			reviews.PUT("/:id", reviewHandler.UpdateReview)
-			reviews.DELETE("/:id", reviewHandler.DeleteReview)
+			reviews.PUT("/:id", middlewares.AdminOnly(), reviewHandler.UpdateReview)    // Only Admin can PUT
+			reviews.DELETE("/:id", middlewares.AdminOnly(), reviewHandler.DeleteReview) // Only Admin can DELETE
 		}
 
-		// Admin Only Routes (for admin only actions)
-		adminRoutes := v1.Group("/admin")
-		adminRoutes.Use(middlewares.AdminOnly()) // Use the AdminOnly middleware for this group
-		{
-			adminRoutes.DELETE("/authors/:id", authorHandler.DeleteAuthor)
-		}
 	}
 }
