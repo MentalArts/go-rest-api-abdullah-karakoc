@@ -154,9 +154,9 @@ http://localhost:8080/swagger/index.html
 curl -X POST "http://localhost:8080/api/v1/auth/register" \
 -H "Content-Type: application/json" \
 -d '{
-  "name": "John Doe",
-  "email": "johndoe@example.com",
-  "password": "SecurePassword123"
+  "username": "user",
+  "email": "user@gmail.com",
+  "password": "user1234"
 }'
 ```
 
@@ -166,8 +166,8 @@ curl -X POST "http://localhost:8080/api/v1/auth/register" \
 curl -X POST "http://localhost:8080/api/v1/auth/login" \
 -H "Content-Type: application/json" \
 -d '{
-  "email": "johndoe@example.com",
-  "password": "SecurePassword123"
+  "email": "user@gmail.com",
+  "password": "user1234"
 }'
 ```
 
