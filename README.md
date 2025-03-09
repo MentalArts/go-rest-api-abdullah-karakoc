@@ -49,7 +49,7 @@ A default admin account is created during system initialization.
 - View all users  
 - Delete users  
 - Assign roles to users  
-- All **POST**, **PUT**, **DELETE** requests are restricted to Admin users  
+- All **POST**, **PUT**, **DELETE** requests are restricted to  ONLY Admin users 
 
 ---
 
@@ -146,6 +146,15 @@ http://localhost:8080/swagger/index.html
 
 ---
 
+[Download Postman Collection](https://github.com/MentalArts/go-rest-api-abdullah-karakoc/raw/refs/heads/main/api_postman_collections.zip)
+
+Easily test the API using Postman! Click the link above to download the pre-configured collection and import it into Postman.
+
+🔑 Important: To perform POST, PUT, and DELETE operations, you must log in with an admin account and use the generated token in your requests.
+
+Happy testing! 🚀
+
+---
 ## 📌 Example API Requests  
 
 ### 🔐 User Registration  
