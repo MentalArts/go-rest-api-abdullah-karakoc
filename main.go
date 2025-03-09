@@ -28,9 +28,13 @@ import (
 //	@license.name	MIT
 //	@license.url	https://opensource.org/licenses/MIT
 
-// @host		localhost:8000
-// @BasePath	/api/v1
-// @schemes	http
+//	@host		localhost:8000
+//	@BasePath	/api/v1
+//	@schemes	http
+
+// @securityDefinitions.apikey	Bearer
+// @in							header
+// @name						Authorization
 func main() {
 	// Connect to the database and migrate models
 	config.ConnectDatabase()

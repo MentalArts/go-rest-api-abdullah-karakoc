@@ -29,7 +29,7 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 //	@Accept			json
 //	@Produce		json
 //	@Param			user	body		dto.RegisterRequestDTO	true	"User Registration Info"
-//	@Success		201		{object}	models.User	"User Created"
+//	@Success		201		{object}	models.User				"User Created"
 //	@Failure		400		{object}	map[string]string		"Invalid input"
 //	@Failure		500		{object}	map[string]string		"Internal server error"
 //	@Router			/auth/register [post]
@@ -61,7 +61,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			login	body		dto.LoginRequestDTO	true	"User Login Info"
-//	@Success		200		{object}	map[string]string		"JWT Token"
+//	@Success		200		{object}	map[string]string	"JWT Token"
 //	@Failure		400		{object}	map[string]string	"Invalid input"
 //	@Failure		401		{object}	map[string]string	"Invalid credentials"
 //	@Failure		500		{object}	map[string]string	"Internal server error"
@@ -101,11 +101,11 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 //	@Tags			Auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			Authorization	header		string	true	"Bearer Token"
-//	@Success		200		{object}	map[string]string	"New JWT Token"
-//	@Failure		400		{object}	map[string]string	"Invalid token format"
-//	@Failure		401		{object}	map[string]string	"Invalid or expired token"
-//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Param			Authorization	header		string				true	"Bearer Token"
+//	@Success		200				{object}	map[string]string	"New JWT Token"
+//	@Failure		400				{object}	map[string]string	"Invalid token format"
+//	@Failure		401				{object}	map[string]string	"Invalid or expired token"
+//	@Failure		500				{object}	map[string]string	"Internal server error"
 //	@Router			/auth/refresh-token [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")

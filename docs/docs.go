@@ -1028,6 +1028,13 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
